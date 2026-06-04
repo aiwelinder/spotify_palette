@@ -2,8 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -14,7 +19,10 @@ app.use(express.json());
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
-const FRONTEND_URI = process.env.FRONTEND_URI;
+const FRONTEND_URI = process.env.FRONTEND_URI || '';
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../../client/dist')));
 
 app.get('/login', (req, res) => {
     const scope = 'user-library-read';
@@ -69,7 +77,9 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-app.get('/refresh_token', async (req, res) => {
+// Refresh token endpoint
+app.get('/api/refresh_token', async (req, res) => {
+// ... rest of logic
     const refresh_token = req.query.refresh_token;
 
     try {
@@ -90,6 +100,11 @@ app.get('/refresh_token', async (req, res) => {
         console.error('Error refreshing token', error);
         res.status(400).send({ error: 'invalid_refresh_token' });
     }
+});
+
+// Wildcard route to serve React's index.html for all other requests
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
 });
 
 app.listen(port, () => {

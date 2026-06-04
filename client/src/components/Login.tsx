@@ -1,7 +1,10 @@
 import React from 'react';
 
 const Login: React.FC = () => {
-    const loginUrl = 'http://127.0.0.1:3001/login';
+    // Use relative path since backend will serve the frontend in production
+    const loginUrl = window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost')
+        ? 'http://127.0.0.1:3001/login' 
+        : '/login';
 
     return (
         <div className="login-container">
