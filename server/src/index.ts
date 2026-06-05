@@ -116,6 +116,6 @@ app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
 });
 
-app.listen(port, '127.0.0.1', () => {
-    console.log(`Server listening at http://127.0.0.1:${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server listening on port ${port}`);
 });
