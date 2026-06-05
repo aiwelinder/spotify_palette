@@ -25,6 +25,10 @@ const FRONTEND_URI = process.env.FRONTEND_URI || '';
 app.use(express.static(path.join(__dirname, '../../client/dist')));
 
 app.get('/login', (req, res) => {
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['host'];
+    const dynamicRedirectUri = `${protocol}://${host}/callback`;
+
     const scope = 'user-library-read';
     const state = Math.random().toString(36).substring(7);
     
@@ -32,7 +36,7 @@ app.get('/login', (req, res) => {
         response_type: 'code',
         client_id: CLIENT_ID!,
         scope: scope,
-        redirect_uri: REDIRECT_URI!,
+        redirect_uri: dynamicRedirectUri,
         state: state
     });
 
@@ -40,16 +44,21 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/callback', async (req, res) => {
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['host'];
+    const dynamicRedirectUri = `${protocol}://${host}/callback`;
+    const dynamicFrontendUri = `${protocol}://${host}`;
+
     const code = req.query.code || null;
     const state = req.query.state || null;
 
     if (state === null) {
-        res.redirect(`${FRONTEND_URI}/?error=state_mismatch`);
+        res.redirect(`${dynamicFrontendUri}/?error=state_mismatch`);
     } else {
         try {
             const params = new URLSearchParams({
                 code: code as string,
-                redirect_uri: REDIRECT_URI!,
+                redirect_uri: dynamicRedirectUri,
                 grant_type: 'authorization_code'
             });
 
