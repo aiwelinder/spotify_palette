@@ -40,7 +40,8 @@ export const logout = () => {
     window.localStorage.removeItem('spotify_access_token');
     window.localStorage.removeItem('spotify_token_timestamp');
     window.localStorage.removeItem('spotify_expires_in');
-    window.location.reload();
+    window.localStorage.removeItem('spotify_refresh_token');
+    window.location.href = window.location.origin;
 };
 
 export const fetchSavedTracksAsAlbums = async (token: string) => {
