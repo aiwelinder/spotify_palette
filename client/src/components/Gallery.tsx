@@ -16,13 +16,19 @@ interface GalleryProps {
     token: string;
 }
 
+type GridSize = 'small' | 'medium' | 'large';
+
 const Gallery: React.FC<GalleryProps> = ({ token }) => {
     const [albums, setAlbums] = useState<Album[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [isStarted, setIsStarted] = useState(false);
     const [status, setStatus] = useState<string>('Initializing...');
     const [progress, setProgress] = useState({ current: 0, total: 0 });
+    const [gridSize, setGridSize] = useState<GridSize>('medium');
 
     useEffect(() => {
+        if (!isStarted) return;
+
         const loadAlbums = async () => {
             try {
                 setLoading(true);
@@ -69,7 +75,40 @@ const Gallery: React.FC<GalleryProps> = ({ token }) => {
         };
 
         loadAlbums();
-    }, [token]);
+    }, [isStarted, token]);
+
+    const handleGenerate = () => {
+        setIsStarted(true);
+    };
+
+    if (!isStarted) {
+        return (
+            <div className="setup-container">
+                <p className="setup-description">
+                    Palette will analyze your library and create a grid sorted by color. 
+                    Choose your grid size and click generate!
+                </p>
+                <div className="setup-controls">
+                    <div className="control-group">
+                        <label htmlFor="grid-size">Grid Size: </label>
+                        <select 
+                            id="grid-size" 
+                            value={gridSize} 
+                            onChange={(e) => setGridSize(e.target.value as GridSize)}
+                            className="grid-size-select"
+                        >
+                            <option value="small">Small (No Scroll)</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    <button onClick={handleGenerate} className="generate-button">
+                        Generate Palette
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (loading && progress.total === 0) {
         return <div className="loading">{status}</div>;
@@ -85,7 +124,20 @@ const Gallery: React.FC<GalleryProps> = ({ token }) => {
 
     return (
         <div className="gallery-container">
-            <div className="album-grid">
+            <div className="controls">
+                <label htmlFor="grid-size">Grid Size: </label>
+                <select 
+                    id="grid-size" 
+                    value={gridSize} 
+                    onChange={(e) => setGridSize(e.target.value as GridSize)}
+                    className="grid-size-select"
+                >
+                    <option value="small">Small (No Scroll)</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+            <div className={`album-grid grid-${gridSize}`}>
                 {albums.map((album) => (
                     <div key={album.id} className="album-item" title={`${album.artists[0].name} - ${album.name}`}>
                         <img 

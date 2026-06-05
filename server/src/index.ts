@@ -88,7 +88,7 @@ app.get('/callback', async (req, res) => {
 
 // Refresh token endpoint
 app.get('/api/refresh_token', async (req, res) => {
-// ... rest of logic
+    console.log("Refresh token requested");
     const refresh_token = req.query.refresh_token;
 
     try {
@@ -112,10 +112,10 @@ app.get('/api/refresh_token', async (req, res) => {
 });
 
 // Wildcard route to serve React's index.html for all other requests
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
 });
 
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+app.listen(port, '127.0.0.1', () => {
+    console.log(`Server listening at http://127.0.0.1:${port}`);
 });
