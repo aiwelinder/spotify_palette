@@ -15,16 +15,27 @@ export interface HSV {
 }
 
 export const extractDominantColor = async (imageUrl: string): Promise<RGB> => {
-    try {
-        const color = await fac.getColorAsync(imageUrl, {
-            crossOrigin: 'anonymous',
-            algorithm: 'dominant'
-        });
-        return { r: color.value[0], g: color.value[1], b: color.value[2] };
-    } catch (err) {
-        console.error("Color extraction failed", err);
-        throw err;
-    }
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = imageUrl;
+
+        img.onload = async () => {
+            try {
+                const color = await fac.getColorAsync(img, {
+                    algorithm: 'dominant'
+                });
+                resolve({ r: color.value[0], g: color.value[1], b: color.value[2] });
+            } catch (err) {
+                reject(err);
+            }
+        };
+
+        img.onerror = (err) => {
+            console.error(`Failed to load image: ${imageUrl}`, err);
+            reject(err);
+        };
+    });
 };
 
 export const rgbToHsv = ({ r, g, b }: RGB): HSV => {
